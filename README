@@ -1,0 +1,20 @@
+Original Project: https://github.com/dpohanlon/ris2bib
+
+Takes .ris files as first argument in the form 'name.ris' and outputs files
+in the bibtex format in the form 'name.bib'. Currently assuming Nature article
+format for ease of programming.
+
+Uses .ris tag information from: http://en.wikipedia.org/wiki/RIS_(file_format)
+
+Supported for multi-record format
+
+Usage is ris2bib.py [FILE] [-v]
+
+Dependency
+
+pip install unidecode
+
+
+
+
+
