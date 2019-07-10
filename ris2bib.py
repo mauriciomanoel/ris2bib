@@ -9,7 +9,6 @@ import unidecode
 def main(argv = sys.argv):
 
 	argc = len(argv)
-
 	if (argc == 1):
 		print "Usage is ris2bib.py [FILE] [-v]"
 	else:
