@@ -32,7 +32,6 @@ def main(argv = sys.argv):
 
 		for entrie in entries:
 			r2b_write(entrie, bib_filename)
-			#print "aqui"
 
 def r2b_read(ris, verbose):
 
@@ -47,15 +46,15 @@ def r2b_read(ris, verbose):
 		if re.match("DB",line):
 			entries['source'] = line[6:-1].rstrip()
 		elif re.match("AN",line):
-			entries['id'] = line[6:-1].rstrip()		
+			entries['id'] = line[6:-1].rstrip().replace(" ", "")
 		elif re.match("T1",line):
-			entries['title'] = line[6:-1].rstrip()				
+			entries['title'] = line[6:-1].rstrip().replace('"', '\\"')				
 		elif re.match("AU",line):
 			entries['authors'].append(line[6:-1].rstrip()) # minus one to remove newline
 		elif re.match("PB",line):
 			entries['publisher'] = line[6:-1].rstrip()
 		elif re.match("AB",line):
-			entries['abstract'] = line[6:-1].rstrip()
+			entries['abstract'] = line[6:-1].rstrip().replace('"', '\\"')
 		elif re.match("SN",line):
 			entries['issn'] = line[6:-1].rstrip()
 		elif re.match("SP",line):
@@ -91,9 +90,10 @@ def r2b_write(entries,bib_filename):
 
 	bib = open(bib_filename,'a') # strip and replace extension
 
-	key = entries['id'] 
+	key = entries['id']
 	if 'source' in entries:	
-		key = key + str(entries['year'])
+		key = key + str(entries['year']) + ","
+		
 	if len(entries['authors']) >= 1:
 		key = entries['authors'][0][:entries['authors'][0].index(',')] + str(entries['year']) + ","
 		#convert plain text to utf-8
@@ -101,6 +101,7 @@ def r2b_write(entries,bib_filename):
 		#convert utf-8 to normal text
 		key = unidecode.unidecode(key)
 
+	key = key.replace(" ", "")
 	bib.write('@ARTICLE{' +  key) # get surname of first author slicing to ','
 	if 'source' in entries:		
 		bib.write('\n\tsource=\t\"'+ str(entries['source']) + "\",")
