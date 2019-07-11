@@ -64,7 +64,7 @@ def r2b_read(ris, verbose):
 		elif re.match("IS",line):
 			entries['issue'] = line[6:-1].rstrip()
 		elif re.match("DO",line):
-			entries['doi'] = line[6:-1].rstrip()
+			entries['doi'] = "https://doi.org/" + line[6:-1].rstrip()
 		elif re.match("Y1",line):
 			y = line[6:-1].split("/")
 			entries['year'] = line[6:-1].rstrip()
@@ -101,7 +101,7 @@ def r2b_write(entries,bib_filename):
 		#convert utf-8 to normal text
 		key = unidecode.unidecode(key)
 
-	key = key.replace(" ", "")
+	key = key.replace(" ", "").replace("-","")
 	bib.write('@ARTICLE{' +  key) # get surname of first author slicing to ','
 	if 'source' in entries:		
 		bib.write('\n\tsource=\t\"'+ str(entries['source']) + "\",")
