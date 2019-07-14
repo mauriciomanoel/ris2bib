@@ -42,17 +42,20 @@ def r2b_read(ris, verbose):
 	"""
 	entries = dict()
 	entries['authors']=list() # Allows for multiple authors
+	entries['keywords']=list() 
 	values = []	
 	for line in ris:
 
 		if re.match("DB",line):
 			entries['source'] = line[6:-1].rstrip()
 		elif re.match("AN",line):
-			entries['id'] = line[6:-1].rstrip()		
+			entries['id'] = line[6:-1].rstrip()
 		elif re.match("T1",line):
 			entries['title'] = line[6:-1].rstrip()				
 		elif re.match("AU",line):
 			entries['authors'].append(line[6:-1].rstrip()) # minus one to remove newline
+		elif re.match("KW",line):
+			entries['keywords'].append(line[6:-1].rstrip()) # minus one to remove newline			
 		elif re.match("PB",line):
 			entries['publisher'] = line[6:-1].rstrip()
 		elif re.match("AB",line):
@@ -80,6 +83,7 @@ def r2b_read(ris, verbose):
 			values.append(entries)
 			entries = dict()
 			entries['authors']=list() # Allows for multiple authors
+			entries['keywords']=list() 
 			print 'Unparsed line: ' + line[:-1]
 	
 	return values
@@ -94,13 +98,15 @@ def r2b_write(entries,bib_filename):
 
 	key = entries['id'] 
 	if 'source' in entries:	
-		key = key + str(entries['year'])
+		key = key + str(entries['year']) + ","
 	if len(entries['authors']) >= 1:
 		key = entries['authors'][0][:entries['authors'][0].index(',')] + str(entries['year']) + ","
 		#convert plain text to utf-8
 		key = unicode(key, "utf-8")
 		#convert utf-8 to normal text
 		key = unidecode.unidecode(key)
+		
+	key = key.replace(" ","").replace("-","")	
 
 	bib.write('@ARTICLE{' +  key) # get surname of first author slicing to ','
 	if 'source' in entries:		
@@ -108,18 +114,21 @@ def r2b_write(entries,bib_filename):
 	if 'id' in entries:		
 		bib.write("\n\tid=\t\"" + str(entries['id']) + "\",")
 	if 'title' in entries:	
-		bib.write("\n\ttitle=\t\"" + entries['title'] + "\",")
-
+		bib.write("\n\ttitle=\t\"" + entries['title'].replace('"', "").replace("'","") + "\",")
 	if len(entries['authors']) >= 1:
 		bib.write('\n\tauthor=\t\"'+entries['authors'][0])
 		for entry in entries['authors'][1:]:
 			bib.write(" and " + entry)
 		bib.write("\",")
-	
 	if 'abstract' in entries:
-		bib.write("\n\tabstract=\t\"" + entries['abstract'] + "\",")
+		bib.write("\n\tabstract=\t\"" + entries['abstract'].replace('"', "").replace("'","") + "\",")
+	if len(entries['keywords']) >= 1:
+		bib.write('\n\tkeywords=\t\"'+entries['keywords'][0].replace('"', "").replace("'",""))
+		for entry in entries['keywords'][1:]:
+			bib.write(" , " + entry.replace('"', "").replace("'",""))
+		bib.write("\",")
 	if 'publisher' in entries:		
-		bib.write("\n\tpublisher=\t\"" + entries['publisher'] + "\",")
+		bib.write("\n\tpublisher=\t\"" + entries['publisher'].replace('"', "").replace("'","") + "\",")
 	if 'year' in entries:
 		bib.write('\n\tyear=\t\"'+ entries['year'] + "\",")
 	if 'issn' in entries:		
@@ -135,7 +144,7 @@ def r2b_write(entries,bib_filename):
 	if 'year' in entries:			
 		bib.write("\n\tyear=\t\"" + entries['year'] + "\",")
 	if 'journal' in entries:			
-		bib.write("\n\tjournal=\t\"" + entries['journal'] + "\",")
+		bib.write("\n\tjournal=\t\"" + entries['journal'].replace('"', "").replace("'","") + "\",")
 	if 'url' in entries:				
 		bib.write("\n\turl=\t\"" + entries['url'] + "\",")
 	bib.write("\n}\n")
